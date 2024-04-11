@@ -1,3 +1,5 @@
+#region VotingAlgo
+
 import pandas as pd
 from collections import defaultdict
 
@@ -48,3 +50,35 @@ for project, score in ranking:
     allocation_project = (allocation / 100) * matching_pool
     print(f"{project}: ${allocation_project:.2f} ({allocation:.2f}%)")
 print('='*50)
+
+#region AdjustedAllocation
+
+# Assuming the sorted_scores list and matching_pool from before are correctly set
+
+# First, prepare the min and max percentages for distribution
+total_funds = 10000  # Total pool of funds to distribute
+min_allocation_percent = 3
+max_allocation_percent = 8
+
+# Prepare to calculate percentages
+score_spread = ranking[0][1] - ranking[-1][1]  # Difference between highest and lowest score
+allocation_spread = max_allocation_percent - min_allocation_percent
+
+# Calculate percentage of total funds for each project
+fund_allocations = {}
+for project, score in ranking:
+    if score_spread > 0:
+        # Linear interpolation for score to percentage mapping
+        score_normalized = (score - ranking[-1][1]) / score_spread
+        allocation_percent = min_allocation_percent + (score_normalized * allocation_spread)
+    else:
+        # If all projects have the same score, distribute funds equally
+        allocation_percent = (min_allocation_percent + max_allocation_percent) / 2
+
+    # Calculate the amount of funds based on the percentage
+    funds_for_project = (allocation_percent / 100) * total_funds
+    fund_allocations[project] = funds_for_project
+
+# Now, print the allocations
+for project, funds in fund_allocations.items():
+    print(f"{project}: ${funds:.2f} ({(funds / total_funds) * 100:.2f}%)")
