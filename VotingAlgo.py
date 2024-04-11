@@ -82,3 +82,4 @@ for project, score in ranking:
 # Now, print the allocations
 for project, funds in fund_allocations.items():
     print(f"{project}: ${funds:.2f} ({(funds / total_funds) * 100:.2f}%)")
+print('='*50)
