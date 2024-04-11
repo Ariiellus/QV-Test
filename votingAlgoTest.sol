@@ -1,48 +1,52 @@
-// SPDX-License-Identifier: MIT
-
 // Code obtained via ChatGPT. DO NOT USE in prod!!!
+
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-contract VotingSystem {
-    struct Candidate {
-        uint id;
-        string name;
-        uint score;
+contract Voting {
+
+    struct Project {
+        uint votes;
+        uint allocation;
     }
 
-    Candidate[] public candidates;
-    mapping(uint => uint) public ranksGiven; // CandidateID to score
-    uint public totalCandidates;
-    uint public totalRanks;
+    mapping(string => Project) public projects;
+    string[] public projectList;
+    uint public totalVotes = 0;
+    uint public matchingPool = 10000; // Amount of funds to be distributed
+    bool public votingEnded = false;
 
-    function addCandidate(string memory name) public {
-        candidates.push(Candidate(totalCandidates, name, 0));
-        totalCandidates++;
+    // Function to vote for projects
+    function voteForProject(string memory projectName, uint votes) public {
+        require(!votingEnded, "Voting has ended.");
+        if(projects[projectName].votes == 0) {
+            projectList.push(projectName);
+        }
+        projects[projectName].votes += votes;
+        totalVotes += votes;
     }
 
-    function vote(uint[] memory candidateIds, uint[] memory points) public {
-        require(candidateIds.length == points.length, "Each candidate must have corresponding points.");
-        require(candidateIds.length <= totalRanks, "Cannot assign more ranks than available.");
-
-        for(uint i = 0; i < candidateIds.length; i++) {
-            uint candidateId = candidateIds[i];
-            uint point = points[i];
-            
-            // Ensure valid candidateId and points are not assigned more than once to the same candidate
-            require(candidateId < totalCandidates, "Invalid candidate ID.");
-            require(ranksGiven[candidateId] == 0, "Points already assigned to this candidate.");
-
-            candidates[candidateId].score += point;
-            ranksGiven[candidateId] = point;
+    // End the voting period and calculate allocations
+    function endVoting() public {
+        require(!votingEnded, "Voting has already ended.");
+        votingEnded = true;
+        for(uint i = 0; i < projectList.length; i++) {
+            string memory projectName = projectList[i];
+            Project storage project = projects[projectName];
+            project.allocation = (project.votes * matchingPool) / totalVotes;
         }
     }
 
-    // A placeholder for setting total ranks available, which could be based on some logic or input
-    function setTotalRanks(uint _totalRanks) public {
-        totalRanks = _totalRanks;
+    // Get the allocation for a project
+    function getAllocation(string memory projectName) public view returns (uint) {
+        require(votingEnded, "Voting has not ended yet.");
+        return projects[projectName].allocation;
     }
 }
 
+
 // Code obtained via ChatGPT. DO NOT USE in prod!!!
+
 // NOTES:
 // Solidity can't handle external data, every voter should make a TX to add their votes to the "database".
+// Details given by ChatGPT can be found in README.md
