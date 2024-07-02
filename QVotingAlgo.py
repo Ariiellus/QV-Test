@@ -5,6 +5,9 @@ from collections import defaultdict
 df = pd.read_csv('TestingPGF.csv')
 vote_cols = df.columns[1:]
 
+for col in vote_cols:
+    df[col] = df[col].map(np.sqrt)
+
 scores = defaultdict(float)
 for col in vote_cols:
     for value in df[col]:
@@ -47,5 +50,5 @@ for project, score in ranking:
 adjusted_allocation_df = pd.DataFrame(adjusted_allocation_data, columns=["Project", "Adjusted Allocation (USD)", "Adjusted Allocation (%)"])
 
 final_df = scores_df.merge(allocation_df, on="Project").merge(adjusted_allocation_df, on="Project")
-final_df.to_csv('Normal_Results.csv', index=False)
+final_df.to_csv('QV_Results.csv', index=False)
 print(final_df)
