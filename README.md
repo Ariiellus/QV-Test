@@ -1,4 +1,4 @@
-# BordaCount
+# Quadratic Voting
 This is a test in python for a Quadratic Voting simulation
 
 # Instructions
